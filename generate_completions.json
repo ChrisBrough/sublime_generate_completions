@@ -1,0 +1,15 @@
+[
+    {
+        "name":"lua",
+        "scope":"source.lua",
+        "destination":"lua",
+        "extract_regex":"(?<!--[.*])(?<=function\\s){1}([a-zA-Z_:.]+)(?=[\\s]?\\()",
+        "comment_regex":"[\\-]*",
+        "single_file":true,
+        "parse_func_params":true,
+        "files":
+        [
+            "path/to/lua/file"
+        ]
+    }
+]
