@@ -20,7 +20,6 @@ VERBOSE = False
 class GenerateCompletionsCommand(sublime_plugin.TextCommand):
     def run(self, edit, mode):
         self.window = self.view.window()
-        self.directory = self.window.folders()[0]
         self.generate_completions_path = os.path.join(sublime.packages_path(), 'User/generate_completions')
 
         if mode == 'update':
