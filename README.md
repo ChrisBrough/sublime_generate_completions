@@ -2,7 +2,7 @@
 ---
 A [Sublime Text](http://www.sublimetext.com) plugin by Chris Brough
 
-![Screeenshot](https://github.com/ChrisBrough/sublime_generate_completions/images/screenshot.png)
+![Screeenshot](https://github.com/ChrisBrough/sublime_generate_completions/blob/master/images/screenshot.png?raw=true)
 
 ## Summary
 ---
