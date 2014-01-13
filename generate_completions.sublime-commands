@@ -1,4 +1,4 @@
 [
     { "caption": "Generate Completions: Update", "command": "generate_completions", "args": { "mode": "update" } },
-    { "caption": "Generate Completions: Clear", "command": "generate_completions", "args": { "mode": "clear" } },
+    { "caption": "Generate Completions: Clear", "command": "generate_completions", "args": { "mode": "clear" } }
 ]
