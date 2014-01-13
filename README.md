@@ -21,7 +21,7 @@ This plugin generates Sublime Text completions for functions in source files. Gi
 ## TODO
 ---
 - test on Sublime Text 2
-- **[package control]**(https://sublime.wbond.net) support
+- [**package control**](https://sublime.wbond.net) support
 - auto generate completions
 - optimize
 - enable/disable completion sets
