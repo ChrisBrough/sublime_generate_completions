@@ -9,7 +9,6 @@ A [Sublime Text](http://www.sublimetext.com) plugin by Chris Brough
 This plugin generates Sublime Text completions for functions in source files. Given a _regex_ pattern, the plugin will search and retrieve matching functions with paramaters and returns. The results are output to a `.sublime-completions` file with placeholders for paramaters, (e.g., `${1:string:name}` to `TestFunc([string:name])`).
 
 ### Command Palatte
----
 - `Generate Complations:Clear` - clears `path/to/packages/User/generate_completions`
 - `Generate Complations:Update` - updates `path/to/packages/User/generate_completions`
 
