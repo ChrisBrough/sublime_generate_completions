@@ -4,7 +4,8 @@
         "scope":"source.lua",
         "destination":"lua",
         "extract_regex":"(?<!--[.*])(?<=function\\s){1}([a-zA-Z_:.]+)(?=[\\s]?\\()",
-        "comment_regex":"[\\-]*",
+        "comment_param_regex":"[\\-]*[\\s]*@(param|string|bool|tab|number|int|func|thread){1}\\s*([a-zA-Z0-9:.]*)",
+        "comment_tparam_regex":"\\-*\\s*@tparam\\s+([a-zA-Z0-9:.]*)\\s+([a-zA-Z0-9:.]*)",
         "single_file":true,
         "parse_func_params":true,
         "files":
