@@ -23,11 +23,13 @@ class GenerateCompletionsCommand(sublime_plugin.TextCommand):
         self.generate_completions_path = os.path.join(sublime.packages_path(), 'User/generate_completions')
 
         if mode == 'update':
-            self.generate_completions_update()
+            self.update()
         elif mode == 'clear':
-            self.generate_completions_clear()
+            self.clear()
+        elif mode == 'comment':
+            self.comment(edit)
 
-    def generate_completions_update(self):
+    def update(self):
         packages_path = sublime.packages_path()
         plugin_path = os.path.join(packages_path, 'GenerateCompletions/generate_completions.json')
 
@@ -39,7 +41,8 @@ class GenerateCompletionsCommand(sublime_plugin.TextCommand):
                 scope = config_entry.get('scope') or 'source.cpp'
                 destination = os.path.join(self.generate_completions_path, config_entry.get('destination'))
                 pattern = config_entry.get('extract_regex')
-                comment_regex = config_entry.get('comment_regex') or '[/\\*]*'
+                comment_param_regex = config_entry.get('comment_param_regex') or ''
+                comment_tparam_regex = config_entry.get('comment_tparam_regex') or ''
                 single_file = config_entry.get('single_file')
                 parse_func_params = config_entry.get('parse_func_params')
                 file_names = []
@@ -72,7 +75,7 @@ class GenerateCompletionsCommand(sublime_plugin.TextCommand):
 
                             if matches:
                                 for match in matches:
-                                    returns, params = extract_func_metadata_from_comment(comment_regex, prev_lines)
+                                    returns, params = extract_func_metadata_from_comment(comment_param_regex, comment_tparam_regex, prev_lines)
 
                                     if not params and parse_func_params:
                                         params = extract_func_metadata_from_func(line)
@@ -89,7 +92,7 @@ class GenerateCompletionsCommand(sublime_plugin.TextCommand):
                 if single_file:
                     write_completions_to_file(destination, name, completion_data)
 
-    def generate_completions_clear(self):
+    def clear(self):
         def answer_callback(index):
             if index == 1:
                 shutil.rmtree(self.generate_completions_path)
@@ -97,19 +100,49 @@ class GenerateCompletionsCommand(sublime_plugin.TextCommand):
         items = [['Cancel', 'Keep: ' + self.generate_completions_path], ['Confirm', 'Remove: ' + self.generate_completions_path]]
         sublime.set_timeout(lambda: self.window.show_quick_panel(items, answer_callback), 0)
 
-def extract_func_metadata_from_comment(comment_regex, comments_string):
+    def comment(self, edit):
+        selection = self.view.sel()
+        if (len(selection) > 0):
+            comment_lang = '--'
+            comment_hr = comment_lang + ' ' + ('-' * 78) + ' ' + comment_lang + '\n'
+            comment_brief = comment_lang + ' @brief\n' + comment_lang + '\n'
+            comment_return = comment_lang + '\n' + comment_lang + ' @return\n'
+            for region in selection:
+                if region.empty():
+                    line = self.view.line(region)
+                    line_contents = self.view.substr(line)
+
+                    params = extract_func_metadata_from_func(line_contents)
+
+                    comment_params = ''
+                    comment_params = comment_params.join([comment_lang + ' @param ' + param + '\n' for param in params])
+                    print(params)
+                    print(comment_params)
+                    comment_block = comment_hr + comment_brief + comment_params + comment_return + comment_hr
+
+                    self.view.insert(edit, line.begin(), comment_block)
+
+def extract_func_metadata_from_comment(comment_param_regex, comment_tparam_regex, comments_string):
     returns = []
     params = []
 
-    regex_prefix = comment_regex + r'[\s]*'
-    regex_postfix = r'\s*([a-zA-Z0-9:]*)'
+    regex_param_pattern = re.compile(comment_param_regex)
+    regex_tparam_pattern = re.compile(comment_tparam_regex)
 
-    regex_return_pattern = re.compile(regex_prefix + r'@return{1}' + regex_postfix)
-    regex_param_pattern = re.compile(regex_prefix + r'@param{1}' + regex_postfix)
-
+    prev_name = ''
     for line in comments_string:
-        returns += regex_return_pattern.findall(line)
-        params += regex_param_pattern.findall(line)
+        for match in regex_param_pattern.findall(line):
+            if len(match) == 2:
+                name = match[1].split('.', 1)
+                if len(name) == 2 and name[0] == prev_name:
+                    params[-1] += str('(' + match[0] + ':' + name[1] + ')')
+                else:
+                    params += [match[0] + ':' + match[1]]
+                prev_name = name[0]
+        for match in regex_tparam_pattern.findall(line):
+            if len(match) == 2:
+                params += [match[0] + ':' + match[1]]
+                prev_name = match[1]
 
     return returns, params
 
