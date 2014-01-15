@@ -106,21 +106,21 @@ class GenerateCompletionsCommand(sublime_plugin.TextCommand):
             comment_lang = '--'
             comment_hr = comment_lang + ' ' + ('-' * 78) + ' ' + comment_lang + '\n'
             comment_brief = comment_lang + ' @brief\n' + comment_lang + '\n'
-            comment_return = comment_lang + '\n' + comment_lang + ' @return\n'
+            comment_return = comment_lang + ' @return\n'
             for region in selection:
                 if region.empty():
                     line = self.view.line(region)
                     line_contents = self.view.substr(line)
+                    if line_contents != '':
+                        params = extract_func_metadata_from_func(line_contents)
 
-                    params = extract_func_metadata_from_func(line_contents)
+                        comment_params = ''
+                        comment_params = comment_params.join([comment_lang + ' @param ' + param + '\n' for param in params])
+                        if comment_params:
+                            comment_params += comment_lang + '\n' 
+                        comment_block = comment_hr + comment_brief + comment_params + comment_return + comment_hr
 
-                    comment_params = ''
-                    comment_params = comment_params.join([comment_lang + ' @param ' + param + '\n' for param in params])
-                    print(params)
-                    print(comment_params)
-                    comment_block = comment_hr + comment_brief + comment_params + comment_return + comment_hr
-
-                    self.view.insert(edit, line.begin(), comment_block)
+                        self.view.insert(edit, line.begin(), comment_block)
 
 def extract_func_metadata_from_comment(comment_param_regex, comment_tparam_regex, comments_string):
     returns = []
@@ -149,7 +149,7 @@ def extract_func_metadata_from_comment(comment_param_regex, comment_tparam_regex
 def extract_func_metadata_from_func(function_string):
     params = []
 
-    function_string = re.findall(r'\({1}(.*)\){1}', function_string)[0] or ''
+    function_string = (re.findall(r'\({1}(.*)\){1}', function_string) or [''])[0]
     regex_param = r'\(?\s*([a-zA-Z0-9_]+)\s*,?'
     regex_param_pattern = re.compile(regex_param)
     params = regex_param_pattern.findall(function_string)
